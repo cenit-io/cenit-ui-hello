@@ -1,11 +1,7 @@
-import IconButton from "@material-ui/core/IconButton";
-import BackIcon from "@material-ui/icons/KeyboardBackspace";
-import React, { useEffect } from "react";
-import { useHistory, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core";
-import { HOME } from "./routes";
 // import Plans from "./Plans";
-import { Switch, Route } from "react-router-dom";
+import AuthorizationService from "../services/AuthorizationService";
 
 const H = 6;
 
@@ -31,11 +27,39 @@ export default function Layout() {
 
     const classes = useStyles();
 
+    const [data, setData] = useState({});
+    const [algorithms, setAlgorithms] = useState({});
+
+    useEffect(() => {
+        const subscription = AuthorizationService.get(
+            `setup/account/${AuthorizationService.getXTenantId()}`
+        ).subscribe(
+            data => setData(data)
+        );
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        const subscription = AuthorizationService.get('setup/algorithm').subscribe(
+            data => setAlgorithms(data)
+        );
+
+        return () => subscription.unsubscribe();
+    }, []);
+
     return (
         <div className={classes.root}>
             <div className={classes.container}>
-                <div className="flex justify-content-center align-items-center relative">
-                    <p>Hello Word</p>
+                <div className="flex column">
+                    <strong>Tenant</strong>
+                    <pre>
+                        {JSON.stringify(data, null, 2)}
+                    </pre>
+                    <strong>Algorithms</strong>
+                    <pre>
+                        {JSON.stringify(algorithms, null, 2)}
+                    </pre>
                 </div>
             </div>
         </div>
